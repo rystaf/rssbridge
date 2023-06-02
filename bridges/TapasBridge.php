@@ -20,6 +20,12 @@ class TapasBridge extends FeedExpander
                 'type' => 'checkbox',
                 'title' => 'Activate to include images or chapter text',
             ],
+            'max_entries' => [
+                'name' => 'maximum entries',
+                'type' => 'number',
+                'title' => 'Maximum amount of entries',
+                'exampleValue' => 5
+            ],
 //            'force_title' => [
 //                'name' => 'Force title use',
 //                'type' => 'checkbox',
@@ -45,19 +51,26 @@ class TapasBridge extends FeedExpander
 
     protected function parseItem(array $item)
     {
-//        $namespaces = $feedItem->getNamespaces(true);
-//        if (isset($namespaces['content'])) {
-//            $description = $feedItem->children($namespaces['content']);
-//            if (isset($description->encoded)) {
-//                $item['content'] = (string)$description->encoded;
-//            }
-//        }
+        $item = parent::parseItem($feedItem);
+
+        $namespaces = $feedItem->getNamespaces(true);
+        if (isset($namespaces['content'])) {
+            $description = $feedItem->children($namespaces['content']);
+            if (isset($description->encoded)) {
+                $scriptRegex = "/<p>(.*?)<\/p>/";
+                preg_match($scriptRegex, (string)$description->encoded, $matches);
+                if ($matches[1] != 'null') {
+                    $item['content'] = '<p>' . $matches[1] . '</p>';
+                }
+            }
+        }
 
         $item['content'] ??= '';
         if ($this->getInput('extend_content')) {
-            $html = getSimpleHTMLDOM($item['uri']);
-            $item['content'] = $item['content'] ?? '';
-
+            $html = getSimpleHTMLDOMCached($item['uri']) or returnServerError('Could not request ' . $this->getURI());
+            if (!$item['content']) {
+                $item['content'] = '';
+            }
             if ($html->find('article.main__body', 0)) {
                 foreach ($html->find('article', 0)->find('img') as $line) {
                     $item['content'] .= '<img src="' . $line->{'data-src'} . '">';
@@ -78,6 +91,14 @@ class TapasBridge extends FeedExpander
         if ($this->id) {
             return self::URI . 'rss/series/' . $this->id;
         }
-        return self::URI . 'series/' . $this->getInput('title') . '/info/';
+        if ($this->getInput('force_title') or !$this->id) {
+            $html = getSimpleHTMLDOM($this->getURI()) or returnServerError('Could not request ' . $this->getURI());
+            $this->id = $html->find('meta[property$=":url"]', 0)->content;
+            $this->id = str_ireplace(['tapastic://series/', '/info'], '', $this->id);
+        }
+        if ($this->getInput('max_entries')) {
+            return $this->collectExpandableDatas($this->getURI(), $this->getInput('max_entries'));
+        }
+        $this->collectExpandableDatas($this->getURI());
     }
 }
