@@ -20,6 +20,12 @@ class TapasBridge extends FeedExpander
                 'type' => 'checkbox',
                 'title' => 'Activate to include images or chapter text',
             ],
+            'max_entries' => [
+                'name' => 'maximum entries',
+                'type' => 'number',
+                'title' => 'Maximum amount of entries',
+                'exampleValue' => 5
+            ],
 //            'force_title' => [
 //                'name' => 'Force title use',
 //                'type' => 'checkbox',
@@ -53,7 +59,7 @@ class TapasBridge extends FeedExpander
         }
 
         if ($this->getInput('extend_content')) {
-            $html = getSimpleHTMLDOM($item['uri']) or returnServerError('Could not request ' . $this->getURI());
+            $html = getSimpleHTMLDOMCached($item['uri']) or returnServerError('Could not request ' . $this->getURI());
             if (!$item['content']) {
                 $item['content'] = '';
             }
@@ -81,6 +87,9 @@ class TapasBridge extends FeedExpander
             $html = getSimpleHTMLDOM($this->getURI()) or returnServerError('Could not request ' . $this->getURI());
             $this->id = $html->find('meta[property$=":url"]', 0)->content;
             $this->id = str_ireplace(['tapastic://series/', '/info'], '', $this->id);
+        }
+        if ($this->getInput('max_entries')) {
+            return $this->collectExpandableDatas($this->getURI(), $this->getInput('max_entries'));
         }
         $this->collectExpandableDatas($this->getURI());
     }
