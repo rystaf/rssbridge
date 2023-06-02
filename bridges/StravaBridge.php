@@ -25,6 +25,8 @@ class StravaBridge extends BridgeAbstract {
             $item = array();
             $item['title'] = $activity->name . ' (' . $activity->detailedType . ')';
             $item['author'] = $jsonData->athlete->name;
+            $item['uri'] = self::URI . '/activities/' . $activity->id;
+            $item['timestamp'] = $activity->startDateLocal;
             $content = '<b>Distance:</b> ' . $activity->distance .
                 '<br><b>Elev Gain:</b> ' . $activity->elevation .
                 '<br><b>Time:</b> ' . $activity->movingTime . '<br><br>';
