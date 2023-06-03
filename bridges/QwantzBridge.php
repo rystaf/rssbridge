@@ -5,6 +5,7 @@ class QwantzBridge extends FeedExpander
     const NAME           = 'Dinosaur Comics';
     const URI            = 'https://qwantz.com/';
     const DESCRIPTION    = 'Latest comic.';
+    const CACHE_TIMEOUT = 0;
 
     public function collectData()
     {
@@ -17,6 +18,9 @@ class QwantzBridge extends FeedExpander
 
         preg_match('/title="(.*?)"/', $item['content'], $matches);
         $title = $matches[1] ?? '';
+
+        preg_match('/title="(.*?)"/', $item['content'], $matches);
+        $title = $matches[1];
 
         $content = str_get_html(html_entity_decode($item['content']));
         $comicURL = $content->find('img')[0]->{'src'};
