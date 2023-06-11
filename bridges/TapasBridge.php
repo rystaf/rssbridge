@@ -49,7 +49,37 @@ class TapasBridge extends FeedExpander
         $this->collectExpandableDatas($this->getURI(), 10);
     }
 
-    protected function parseItem(array $item)
+    public function getID($uri)
+    {
+        $html = getSimpleHTMLDOM($uri) or returnServerError('Could not request ' . $uri);
+        $meta = $html->find('meta[property$=":url"]', 0)->content;
+        if (preg_match('/tapastic:\/\/series\/([\d]+)\/.+/', $meta, $matches) > 0) {
+            $this->id = $matches[1];
+        }
+    }
+
+    public function detectParameters($url)
+    {
+        if (preg_match('/tapas\.io\/episode\/([\d]+)/', $url, $matches) > 0) {
+            $this->getID($url);
+            return [
+                'title' => $this->id,
+                'extend_content' => true,
+                'max_entries' => 1
+            ];
+        }
+        if (preg_match('/tapas\.io\/series\/([\w]+)\/info/', $url, $matches) > 0) {
+            return [
+                'title' => $matches[1],
+                'extend_content' => true,
+                'max_entries' => 1
+            ];
+        }
+
+        return null;
+    }
+
+    protected function parseItem($feedItem)
     {
         $item = parent::parseItem($feedItem);
 
@@ -92,9 +122,7 @@ class TapasBridge extends FeedExpander
             return self::URI . 'rss/series/' . $this->id;
         }
         if ($this->getInput('force_title') or !$this->id) {
-            $html = getSimpleHTMLDOM($this->getURI()) or returnServerError('Could not request ' . $this->getURI());
-            $this->id = $html->find('meta[property$=":url"]', 0)->content;
-            $this->id = str_ireplace(['tapastic://series/', '/info'], '', $this->id);
+            $this->getID($this->getURI());
         }
         if ($this->getInput('max_entries')) {
             return $this->collectExpandableDatas($this->getURI(), $this->getInput('max_entries'));
