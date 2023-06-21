@@ -10,16 +10,17 @@ class SMBCBridge extends FeedExpander
     {
         $item = parent::parseItem($feedItem);
 
+        $item['title'] = str_replace('Saturday Morning Breakfast Cereal - ', '', $item['title']);
         $content = str_get_html(html_entity_decode($item['content']));
         $comicURL = $content->find('img')[0]->{'src'};
-        $title = $content->find('p')[0]->plaintext;
-        $title = str_replace("Hovertext:", "", $title);
+        $hovertext = $content->find('p')[0]->plaintext;
+        $hovertext = str_replace("Hovertext:", "", $hovertext);
         $news = substr($item['content'], strpos($item['content'], "News:<br />") + 11);
 
         $html = getSimpleHTMLDOMCached($item['uri']) or returnServerError('Could not request ' . $this->getURI());
         $afterURL = $html->find('#aftercomic img', 0)->{'src'};
 
-        $item['content'] = "<figure><img src=\"{$comicURL}\"><figcaption><p>{$title}</p></figcaption></figure><p><img src=\"{$afterURL}\"></p>{$news}";
+        $item['content'] = "<figure><img src=\"{$comicURL}\"><figcaption><p>{$hovertext}</p></figcaption></figure><p><img src=\"{$afterURL}\"></p>{$news}";
 
         return $item;
     }
@@ -30,6 +31,6 @@ class SMBCBridge extends FeedExpander
     }
 
     public function getIcon() {
-        return self::URI . 'favicon.ico';
+        return self::URI . '/favicon.ico';
     }
 }
