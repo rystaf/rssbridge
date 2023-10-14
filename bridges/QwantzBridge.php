@@ -24,8 +24,11 @@ class QwantzBridge extends FeedExpander
 
         $content = str_get_html(html_entity_decode($item['content']));
         $comicURL = $content->find('img')[0]->{'src'};
-        $subject = $content->find('a')[1]->{'href'};
-        $subject = urldecode(substr($subject, strpos($subject, 'subject') + 8));
+
+        $subject = $content->find('a')[1];
+        preg_match('/mailto:ryan@qwantz.com\?subject=(.*?)">/', $subject, $matches);
+        $subject = urldecode($matches[1]);
+
         $p = (string)$content->find('P')[0];
 
         $item['content'] = "{$subject}<figure><img src=\"{$comicURL}\"><figcaption><p>{$title}</p></figcaption></figure>{$p}";
