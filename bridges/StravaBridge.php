@@ -29,9 +29,9 @@ class StravaBridge extends BridgeAbstract
         $athleteID = $this->getInput('athleteID');
 
         $dom = getSimpleHTMLDOM(self::URI . '/athletes/' . $athleteID);
-        $scriptRegex = "/data-react-props='(.*?)'/";
-        preg_match($scriptRegex, $dom, $matches) or returnServerError('Could not find json');
-        $jsonData = json_decode(html_entity_decode($matches[1]));
+        $nextData = $dom->find("#__NEXT_DATA__", 0);
+        $jsonData = json_decode(html_entity_decode($nextData->innertext));
+        $jsonData = $jsonData->props->pageProps->athleteData;
         $this->feedName = $jsonData->athlete->name . "'s Recent Activities";
         $this->iconURL = $jsonData->athlete->avatarUrl;
         foreach ($jsonData->recentActivities as $activity) {
