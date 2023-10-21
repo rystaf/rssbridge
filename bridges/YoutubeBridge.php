@@ -72,6 +72,33 @@ class YoutubeBridge extends BridgeAbstract
         ]
     ];
 
+    public function detectParameters($url)
+    {
+        if (preg_match('/youtube\.com\/channel\/([a-zA-Z0-9\-_]+)/', $url, $matches) > 0) {
+            return [
+                'c' => $matches[1]
+            ];
+        } else if (preg_match('/youtube\.com\/(@[a-zA-Z0-9\-_]+)/', $url, $matches) > 0) {
+            return [
+                'custom' => $matches[1]
+            ];
+        } else if (preg_match('/youtube\.com\/.+list=([a-zA-Z0-9\-_]+)/', $url, $matches) > 0) {
+            return [
+                'p' => $matches[1]
+            ];
+        } else if (preg_match('/youtube\.com\/watch.+/', $url, $matches) > 0) {
+            $html = getSimpleHTMLDOM($url);
+            foreach ($html->find('link[itemprop=url]') as $link) {
+                if (preg_match('/youtube\.com\/(@[a-zA-Z0-9\-_]+)/', $link->href, $matches) > 0) {
+                    return [
+                        'custom' => $matches[1]
+                    ];
+                }
+            }
+        }
+        return null;
+    }
+
     private $feedName = '';
     private $feeduri = '';
     private $feedIconUrl = '';
