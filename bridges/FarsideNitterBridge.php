@@ -11,6 +11,11 @@ class FarsideNitterBridge extends FeedExpander
             'username' => [
                 'name' => 'username',
                 'required' => true
+            ],
+            'linkBackToTwitter' => [
+                'name' => 'Link back to twitter',
+                'type' => 'checkbox',
+                'required' => false
             ]
         ],
     ];
@@ -19,7 +24,8 @@ class FarsideNitterBridge extends FeedExpander
     {
         if (preg_match('/^(https?:\/\/)?(www\.)?(nitter\.net|twitter\.com)\/([^\/?\n]+)/', $url, $matches) > 0) {
             return [
-                'username' => $matches[4]
+                'username' => $matches[4],
+                'linkBackToTwitter' => true
             ];
         }
         return null;
@@ -33,13 +39,20 @@ class FarsideNitterBridge extends FeedExpander
     protected function parseItem(array $item)
     {
         if (preg_match('/(\/status\/.+)/', $item['uri'], $matches) > 0) {
-            $item['uri'] = self::URI . $this->getInput('username') . $matches[1];
+            if ($this->getInput('linkBackToTwitter')) {
+                $item['uri'] = 'https://twitter.com/' . $this->getInput('username') . $matches[1];
+            } else {
+                $item['uri'] = self::URI . $this->getInput('username') . $matches[1];
+            }
         }
         return $item;
     }
 
     public function getURI()
     {
+        if ($this->getInput('linkBackToTwitter')) {
+            return 'https://twitter.com/' . $this->getInput('username');
+        }
         return self::URI . $this->getInput('username');
     }
 }
