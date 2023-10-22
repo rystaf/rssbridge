@@ -6,8 +6,8 @@ class CercaBridge extends FeedExpander
     const DESCRIPTION = "Returns latest posts";
     const PARAMETERS = [
         [
-            'feed' => [
-                'name' => 'feed',
+            'domain' => [
+                'name' => 'domain',
                 'required' => true
             ],
         ],
@@ -16,7 +16,7 @@ class CercaBridge extends FeedExpander
     public function collectData()
     {
         $this->fails = 0;
-        $this->collectExpandableDatas($this->getInput('feed'), 5);
+        $this->collectExpandableDatas("https://" . $this->getInput('domain') . "/rss.xml", 5);
     }
 
     protected function parseItem(array $item)
@@ -62,5 +62,9 @@ class CercaBridge extends FeedExpander
             DEFAULT_BR_TEXT,
             DEFAULT_SPAN_TEXT 
         );
+    }
+    public function getIcon()
+    {
+        return "https://" . $this->getInput('domain') . "/assets/favicon.png";
     }
 }
