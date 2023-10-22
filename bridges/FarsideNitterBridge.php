@@ -5,7 +5,6 @@ class FarsideNitterBridge extends FeedExpander
     const NAME = 'Farside Nitter Bridge';
     const DESCRIPTION = "Returns an user's recent tweets";
     const URI = 'https://farside.link/nitter/';
-    const CACHE_TIMEOUT = 0;
     const PARAMETERS = [
         [
             'username' => [
@@ -33,7 +32,19 @@ class FarsideNitterBridge extends FeedExpander
 
     public function collectData()
     {
-        $this->collectExpandableDatas(self::URI . $this->getInput('username') . '/rss');
+        $this->getRSS();
+    }
+
+    public function getRSS($attempt = 0) {
+        try {
+            $this->collectExpandableDatas(self::URI . $this->getInput('username') . '/rss');
+        } catch (\Exception $e) {
+            if ($attempt > 2) {
+                throw $e;
+            } else {
+                $this->getRSS($attempt++);
+            }
+        }
     }
 
     protected function parseItem(array $item)
