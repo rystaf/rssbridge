@@ -59,6 +59,14 @@ class FarsideNitterBridge extends FeedExpander
         return $item;
     }
 
+    public function getName()
+    {
+        if (preg_match('/(.+) \//', parent::getName(), $matches) > 0) {
+            return $matches[1];
+        }
+        return parent::getName();
+    }
+
     public function getURI()
     {
         if ($this->getInput('linkBackToTwitter')) {
