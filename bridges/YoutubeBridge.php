@@ -578,7 +578,7 @@ class YoutubeBridge extends BridgeAbstract
             case 'By custom name':
             case 'By playlist Id':
             case 'Search result':
-                return htmlspecialchars_decode($this->feedName) . ' - YouTube';
+                return htmlspecialchars_decode($this->feedName);
             default:
                 return parent::getName();
         }
