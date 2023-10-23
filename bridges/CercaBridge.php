@@ -50,7 +50,7 @@ class CercaBridge extends FeedExpander
                 return;
             }
             foreach (array_reverse($html->find('article')) as $article) {
-                $timestamp = strtotime($article->find('time', 0)->innertext . ' 12:00:00');
+                $timestamp = strtotime($article->find('time', 0)->datetime);
                 if (((($this->now - $timestamp) / 3600) > self::TIMEFRAME) && count($this->posts) >= self::MAX_POSTS){
                     continue;
                 }
