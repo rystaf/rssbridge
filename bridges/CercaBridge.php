@@ -57,11 +57,15 @@ class CercaBridge extends FeedExpander
                 if (date('d', $timestamp) == date('d', $item["timestamp"])) {
                     $timestamp = $item["timestamp"];
                 }
+                $uri = str_replace($anchor, '#'.$article->id, $item['uri']);
+                if (preg_match('/\/thread\/([\d]+)/', $item['uri'], $matches) > 0) {
+                    $uri = "https://" . $this->getInput('domain') . '/thread/' . $matches[1] . $anchor;
+                }
                 $author = $article->find('b', 0)->innertext;
                 $body = str_get_html($article->save());
                 $body->find('article',0)->first_child()->remove();
                 $this->posts[(int)$article->id] = [
-                    "uri" => str_replace($anchor, '#'.$article->id, $item['uri']),
+                    "uri" => $uri,
                     "author" => $author,
                     "title" => $item["title"],
                     "timestamp" => $timestamp,
