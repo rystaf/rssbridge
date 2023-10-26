@@ -153,14 +153,13 @@ class YoutubeBridge extends BridgeAbstract
         if ($url_feed || $url_listing) {
             // user, channel or custom
             $this->feeduri = $url_listing;
-            if ($custom) {
-                // Extract the feed url for the custom name
-                $html = $this->fetch($url_listing);
-                $jsonData = $this->extractJsonFromHtml($html);
-                // Pluck out the rss feed url
+            $html = $this->fetch($url_listing);
+            $jsonData = $this->extractJsonFromHtml($html);
+            // Extract the feed url for the custom name
+            if (!$url_feed) {
                 $url_feed = $jsonData->metadata->channelMetadataRenderer->rssUrl;
-                $this->feedIconUrl = $jsonData->metadata->channelMetadataRenderer->avatar->thumbnails[0]->url;
             }
+            $this->feedIconUrl = $jsonData->metadata->channelMetadataRenderer->avatar->thumbnails[0]->url;
             if ($filterByDuration) {
                 if (!$custom) {
                     // Fetch the html page
