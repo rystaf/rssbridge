@@ -33,7 +33,7 @@ class CercaBridge extends FeedExpander
         if (!$this->now) {
             $this->now = $item['timestamp'];
         } else {
-            if (((($this->now - $item['timestamp']) / 3600) > self::TIMEFRAME) && count($this->posts) >= self::MAX_POSTS) {
+            if (((($this->now - $item['timestamp']) / 3600) > self::TIMEFRAME)) {
                 return;
             }
         }
@@ -53,7 +53,7 @@ class CercaBridge extends FeedExpander
             $i = count($articles);
             foreach (array_reverse($articles) as $article) {
                 $timestamp = strtotime($article->find('time', 0)->datetime);
-                if (((($this->now - $timestamp) / 3600) > self::TIMEFRAME) && count($this->posts) >= self::MAX_POSTS){
+                if ((($this->now - $timestamp) / 3600) > self::TIMEFRAME){
                     continue;
                 }
                 if (date('d', $timestamp) == date('d', $item["timestamp"])) {
@@ -63,7 +63,7 @@ class CercaBridge extends FeedExpander
                 $body = str_get_html($article->save());
                 $body->find('article',0)->first_child()->remove();
                 $this->posts[(int)$article->id] = [
-                    "uri" => preg_replace('/(\/thread\/[\d]+\/.+-)\d+\/#\d+/','${1}'.$i.'/'.$anchor, $item['uri']),
+                    "uri" => preg_replace('/(\/thread\/[\d]+\/.+-)\d+\/#\d+/','${1}'.$i.'/#'.$article->id, $item['uri']),
                     "author" => $author,
                     "title" => $item["title"],
                     "timestamp" => $timestamp,
